@@ -1,63 +1,71 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import com.sun.org.apache.xpath.internal.SourceTree;
+
+import java.util.*;
 
 public class Main {
+
     public static void main(String[] args) {
+        final String START_CITY = "Toliatty";
+        final String END_CITY = "Moscow";
+
         List<CityDistance> cities = getCities();
-        calcDistance("Toliatty", "Moscow", cities);
+
+        int distance = calcDistance("Toliatty", "Moscow", cities);
+
+
     }
 
-    private static int calcDistance(String firstCity, String secondCity, List<CityDistance> cities) {
-        if (isValidList(cities, firstCity) && isValidList(cities, secondCity)) {
-            String citiesName[] = {"Toliatty", "Samara", "Demitrovgrad", "Ulianovsk", "Riazan", "Moscow"};//выбрать в бд
-            int sizeList = citiesName.length;
-            int min = 0;
-            int index = findIndex(cities, firstCity);
-            int distance = 0;
-            String lastName = null;
-            for (CityDistance city : cities) {
-                if(Objects.equals(city.getFirstCity(), firstCity)){
-                    lastName = city.getSecondCity();
-                    if (min < city.getDistance()) {
-                        min = city.getDistance();
+    private static int calcDistance(String startCity, String endCity, List<CityDistance> cities) {
+        int min;
+        String[] citiesAll = {"Toliatty", "Samara", "Demitrovgrad", "Ulianovsk", "Riazan", "Moscow"};
+        List<CityDistance> result = new ArrayList<>();
+        CityDistance minCityDistance = new CityDistance();
+        int index = 0;
+        int distance = 0;
+        String minCity = citiesAll[0];
+        for (String city : citiesAll) {
+            min = 0;
+            boolean isEnd = false;
+            for (; index < cities.size(); index++) {
+                if (cities.get(index).getFirstCity() != city) {
+                    break;
+                }
+                if (min == 0 && cities.get(index).getFirstCity() == city) {
+                    min = cities.get(index).getDistance();
+                    minCityDistance.setFirstCity(cities.get(index).getFirstCity());
+                    minCityDistance.setSecondCity(cities.get(index).getSecondCity());
+                    minCityDistance.setDistance(cities.get(index).getDistance());
+                } else if (cities.get(index).getFirstCity() == city) {
+                    if (cities.get(index).getDistance() < min) {
+                        min = cities.get(index).getDistance();
+                        minCity = cities.get(index).getSecondCity();
                     }
                 }
-                else{
-                    firstCity = city.getFirstCity();
-                    lastName = city.getSecondCity();
+                if (cities.get(index).getSecondCity() == endCity) {
+                    min = cities.get(index).getDistance();
+                    isEnd = true;
+                    break;
                 }
             }
-        }
-        else{
-            System.out.println("Error");
+            if(minCity != cities.get(index + 1).getFirstCity()){
+                city = minCity;
+            }
+            if (isEnd) {
+                distance += min;
+                System.out.println(city + ": " + distance);
+            } else {
+                distance += min;
+                if(minCity != cities.get(index + 1).getFirstCity()){
+                    while(minCity != cities.get(index + 1).getFirstCity()){
+                        index++;
+                    }
+                }
+            }
         }
 
         return 1;
-
     }
 
-    private static boolean isValidList(List<CityDistance> cities, String city) {
-        boolean isValid = false;
-        for (CityDistance cityDistance : cities) {
-            if (Objects.equals(cityDistance.getFirstCity(), city)
-                    || Objects.equals(cityDistance.getSecondCity(), city)) {
-                isValid = true;
-            }
-        }
-        return isValid;
-    }
-
-    private static int findIndex(List<CityDistance> cities, String city){
-        int index = 0;
-        for(int i=0; i < cities.size(); i++){
-           if(Objects.equals(cities.get(i).getFirstCity(), city)){
-                index = i;
-                break;
-           }
-        }
-        return index;
-    }
 
     private static List<CityDistance> getCities() {
         List<CityDistance> cities = new ArrayList<>();
